@@ -1,4 +1,6 @@
-# RagXO; Export, version and reuse your RAG pipeline everywhere 🚀
+# RagXO
+
+Export, version and reuse your RAG pipeline everywhere 🚀
 
 [![PyPI version](https://badge.fury.io/py/ragxo.svg)](https://badge.fury.io/py/ragxo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -46,7 +48,11 @@ ragxo_client.add_embedding_fn(get_embeddings)
 ragxo_client.add_system_prompt("You are a helpful assistant that can answer questions about the data provided.")
 ragxo_client.add_model("gpt-4o-mini")
 
-ragxo_client.index([Document(text="Hello, world!", metadata={"source": "example"}, id=1)])
+ragxo_client.index([
+    Document(text="Capital of France is Paris", metadata={"source": "example"}, id=1),
+    Document(text="Capital of Germany is Berlin", metadata={"source": "example"}, id=2),
+    Document(text="Capital of Italy is Rome", metadata={"source": "example"}, id=3),
+])
 
 ragxo_client.export("my_rag_v1.0.0")
 

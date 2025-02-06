@@ -37,6 +37,10 @@ class Ragxo:
         self.processing_fn.append(fn)
         return self
     
+    def add_llm_response_fn(self, fn: Callable) -> Self:
+        self.llm_response_fn = fn
+        return self
+    
     def add_embedding_fn(self, fn: Callable) -> Self:
         if not fn:
             raise ValueError("Embedding function cannot be None")
