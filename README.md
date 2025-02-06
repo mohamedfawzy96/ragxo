@@ -1,4 +1,4 @@
-# RagXO 🚀
+# RagXO; Export, version and reuse your RAG pipeline everywhere 🚀
 
 [![PyPI version](https://badge.fury.io/py/ragxo.svg)](https://badge.fury.io/py/ragxo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
