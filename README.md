@@ -66,7 +66,14 @@ loaded_ragxo_client = Ragxo.load("my_rag_v1.0.0")
 
 results = loaded_ragxo_client.query("What is the capital of France?")
 
-llm_response = loaded_ragxo_client.generate_llm_response("What is the capital of France?")
+llm_response = loaded_ragxo_client.generate_llm_response(
+    "What is the capital of France?", 
+    limit=10,
+    temperature=0.5, 
+    max_tokens=1000, 
+    top_p=1.0, 
+    frequency_penalty=0.0, 
+    presence_penalty=0.0)
 
 ```
 

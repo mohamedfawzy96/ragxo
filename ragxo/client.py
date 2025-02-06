@@ -82,7 +82,7 @@ class Ragxo:
         ])
         return self
     
-    def query(self, query: str, output_fields: list[str] = ['text', 'metadata']) -> list[list[dict]]:
+    def query(self, query: str, output_fields: list[str] = ['text', 'metadata'], limit: int = 10) -> list[list[dict]]:
         if not self.embedding_fn:
             raise ValueError("Embedding function not set. Please call add_embedding_fn first.")
             
@@ -95,7 +95,7 @@ class Ragxo:
         return self.client.search(
             collection_name=self.collection_name,
             data=[embedding],
-            limit=10,
+            limit=limit,
             output_fields=output_fields
         )
 
@@ -239,9 +239,18 @@ class Ragxo:
             logger.error(f"Error in S3 load: {e}")
             raise
     
-    def generate_llm_response(self, query: str, data: list[dict] = None) -> ChatCompletion:
+    def generate_llm_response(self, 
+                              query: str, 
+                              limit: int = 10,
+                              data: list[dict] = None, 
+                              temperature: float = 0.5,
+                              max_tokens: int = 1000,
+                              top_p: float = 1.0,
+                              frequency_penalty: float = 0.0,
+                              presence_penalty: float = 0.0,
+                              ) -> ChatCompletion:
         if data is None:
-            data = self.query(query)[0]
+            data = self.query(query, limit=limit)[0]
         
         if not self.system_prompt:
             raise ValueError("System prompt not set. Please call add_system_prompt first.")
@@ -251,7 +260,12 @@ class Ragxo:
             messages=[
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": "query: {} data: {}".format(query, data)}
-            ]
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+            frequency_penalty=frequency_penalty,
+            presence_penalty=presence_penalty,
         )
         
         return response
