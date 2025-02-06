@@ -20,7 +20,26 @@ class Document(BaseModel):
     id: int
 
 class Ragxo:
+    """
+    A RAG (Retrieval-Augmented Generation) system that combines vector search with LLM responses.
+    
+    Attributes:
+        dimension (int): Dimension of the embedding vectors
+        collection_name (str): Name of the Milvus collection
+        db_path (str): Path to the Milvus database
+        processing_fn (list): List of preprocessing functions
+        embedding_fn (Callable): Function to generate embeddings
+        system_prompt (str): System prompt for LLM
+        model (str): LLM model name
+    """
+    
     def __init__(self, dimension: int) -> None:
+        """
+        Initialize the Ragxo instance.
+        
+        Args:
+            dimension (int): Dimension of the embedding vectors
+        """
         self.dimension = dimension
         self.collection_name = "ragx"
         os.makedirs("ragx_artifacts", exist_ok=True)
@@ -34,28 +53,105 @@ class Ragxo:
         self.model = "gpt-4o-mini"
     
     def add_preprocess(self, fn: Callable) -> Self:
+        """
+        Add a preprocessing function to the pipeline.
+        
+        Args:
+            fn (Callable): Function that takes and returns a string
+            
+        Returns:
+            Self: The current instance for method chaining
+        """
         self.processing_fn.append(fn)
         return self
     
     def add_llm_response_fn(self, fn: Callable) -> Self:
+        """
+        Add a function to process LLM responses.
+        
+        Args:
+            fn (Callable): Function to process LLM responses
+            
+        Returns:
+            Self: The current instance for method chaining
+        """
         self.llm_response_fn = fn
         return self
     
     def add_embedding_fn(self, fn: Callable) -> Self:
+        """
+        Set the embedding function for vector generation.
+        
+        Args:
+            fn (Callable): Function that converts text to embeddings
+            
+        Returns:
+            Self: The current instance for method chaining
+            
+        Raises:
+            ValueError: If fn is None
+        """
         if not fn:
             raise ValueError("Embedding function cannot be None")
         self.embedding_fn = fn
         return self
     
     def add_system_prompt(self, prompt: str) -> Self:
+        """
+        Set the system prompt for LLM interactions.
+        
+        Args:
+            prompt (str): System prompt text
+            
+        Returns:
+            Self: The current instance for method chaining
+        """
         self.system_prompt = prompt
         return self
     
-    def add_model(self, model: str) -> Self:
+    def add_model(self, model: str,                              limit: int = 10,
+                        temperature: float = 0.5,
+                        max_tokens: int = 1000,
+                        top_p: float = 1.0,
+                        frequency_penalty: float = 0.0,
+                        presence_penalty: float = 0.0) -> Self:
+        """
+        Configure the LLM model and its parameters.
+        
+        Args:
+            model (str): Name of the LLM model
+            limit (int): Maximum number of results to return from vector search
+            temperature (float): Sampling temperature
+            max_tokens (int): Maximum tokens in response
+            top_p (float): Nucleus sampling parameter
+            frequency_penalty (float): Frequency penalty parameter
+            presence_penalty (float): Presence penalty parameter
+            
+        Returns:
+            Self: The current instance for method chaining
+        """
         self.model = model
+        self.limit = limit
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.top_p = top_p
+        self.frequency_penalty = frequency_penalty
+        self.presence_penalty = presence_penalty
         return self
     
     def index(self, data: list[Document]) -> Self:
+        """
+        Index documents into the vector database.
+        
+        Args:
+            data (list[Document]): List of documents to index
+            
+        Returns:
+            Self: The current instance for method chaining
+            
+        Raises:
+            ValueError: If embedding function is not set
+        """
         if not self.embedding_fn:
             raise ValueError("Embedding function not set")
             
@@ -83,6 +179,20 @@ class Ragxo:
         return self
     
     def query(self, query: str, output_fields: list[str] = ['text', 'metadata'], limit: int = 10) -> list[list[dict]]:
+        """
+        Search the vector database for similar documents.
+        
+        Args:
+            query (str): Search query
+            output_fields (list[str]): Fields to return in results
+            limit (int): Maximum number of results
+            
+        Returns:
+            list[list[dict]]: Search results
+            
+        Raises:
+            ValueError: If embedding function is not set
+        """
         if not self.embedding_fn:
             raise ValueError("Embedding function not set. Please call add_embedding_fn first.")
             
@@ -240,17 +350,23 @@ class Ragxo:
             raise
     
     def generate_llm_response(self, 
-                              query: str, 
-                              limit: int = 10,
-                              data: list[dict] = None, 
-                              temperature: float = 0.5,
-                              max_tokens: int = 1000,
-                              top_p: float = 1.0,
-                              frequency_penalty: float = 0.0,
-                              presence_penalty: float = 0.0,
-                              ) -> ChatCompletion:
+                              query: str,
+                              data: list[dict] = None) -> ChatCompletion:
+        """
+        Generate LLM response based on query and retrieved data.
+        
+        Args:
+            query (str): User query
+            data (list[dict], optional): Retrieved documents. If None, performs a new query
+            
+        Returns:
+            ChatCompletion: LLM response
+            
+        Raises:
+            ValueError: If system prompt is not set
+        """
         if data is None:
-            data = self.query(query, limit=limit)[0]
+            data = self.query(query, limit=self.limit)[0]
         
         if not self.system_prompt:
             raise ValueError("System prompt not set. Please call add_system_prompt first.")
@@ -261,11 +377,11 @@ class Ragxo:
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": "query: {} data: {}".format(query, data)}
             ],
-            temperature=temperature,
-            max_tokens=max_tokens,
-            top_p=top_p,
-            frequency_penalty=frequency_penalty,
-            presence_penalty=presence_penalty,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            top_p=self.top_p,
+            frequency_penalty=self.frequency_penalty,
+            presence_penalty=self.presence_penalty,
         )
         
         return response

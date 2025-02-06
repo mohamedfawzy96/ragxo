@@ -37,7 +37,7 @@ def preprocess_text_remove_special_chars(text: str) -> str:
     return re.sub(r'[^a-zA-Z0-9\s]', '', text)
 
 def get_embeddings(text: str) -> list[float]:
-    return openai.embeddings.create(text=text, model="text-embedding-ada-002").data[0].embedding
+    return openai.embeddings.create(input=text, model="text-embedding-ada-002").data[0].embedding
 
 ragxo_client = Ragxo(dimension=768)
 
@@ -46,7 +46,14 @@ ragxo_client.add_preprocess(preprocess_text_remove_special_chars)
 ragxo_client.add_embedding_fn(get_embeddings)
 
 ragxo_client.add_system_prompt("You are a helpful assistant that can answer questions about the data provided.")
-ragxo_client.add_model("gpt-4o-mini")
+ragxo_client.add_model(
+    "gpt-4o-mini",
+    temperature=0.5,
+    max_tokens=1000,
+    top_p=1.0,
+    frequency_penalty=0.0,
+    presence_penalty=0.0
+)
 
 ragxo_client.index([
     Document(text="Capital of France is Paris", metadata={"source": "example"}, id=1),
@@ -64,16 +71,10 @@ ragxo_client.export("my_rag_v1.0.0")
 ```python
 loaded_ragxo_client = Ragxo.load("my_rag_v1.0.0")
 
-results = loaded_ragxo_client.query("What is the capital of France?")
+vector_search_results = loaded_ragxo_client.query("What is the capital of France?")
 
 llm_response = loaded_ragxo_client.generate_llm_response(
-    "What is the capital of France?", 
-    limit=10,
-    temperature=0.5, 
-    max_tokens=1000, 
-    top_p=1.0, 
-    frequency_penalty=0.0, 
-    presence_penalty=0.0)
+    "What is the capital of France?")
 
 ```
 
