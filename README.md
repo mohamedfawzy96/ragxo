@@ -1,6 +1,6 @@
 # RagXO
 
-Export, version and reuse your RAG pipeline everywhere 🚀
+Export, version and reuse your E2E RAG pipeline everywhere 🚀
 
 [![PyPI version](https://badge.fury.io/py/ragxo.svg)](https://badge.fury.io/py/ragxo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -30,16 +30,18 @@ pip install ragxo
 ```python
 from ragxo import Ragxo, Document
 
-def preprocess_text_lower(text: str) -> str:
-    return text.lower()
+
+
+ragxo_client = Ragxo(dimension=1536)
 
 def preprocess_text_remove_special_chars(text: str) -> str:
     return re.sub(r'[^a-zA-Z0-9\s]', '', text)
 
+def preprocess_text_lower(text: str) -> str:
+    return text.lower()
+
 def get_embeddings(text: str) -> list[float]:
     return openai.embeddings.create(input=text, model="text-embedding-ada-002").data[0].embedding
-
-ragxo_client = Ragxo(dimension=768)
 
 ragxo_client.add_preprocess(preprocess_text_lower)
 ragxo_client.add_preprocess(preprocess_text_remove_special_chars)
@@ -48,6 +50,7 @@ ragxo_client.add_embedding_fn(get_embeddings)
 ragxo_client.add_system_prompt("You are a helpful assistant that can answer questions about the data provided.")
 ragxo_client.add_model(
     "gpt-4o-mini",
+    limit=10,
     temperature=0.5,
     max_tokens=1000,
     top_p=1.0,
@@ -63,6 +66,9 @@ ragxo_client.index([
 
 ragxo_client.export("my_rag_v1.0.0")
 
+# or export to s3
+ragxo_client.export("my_rag_v1.0.0", s3_bucket="my_bucket")
+
 ```
 
 
@@ -76,6 +82,7 @@ vector_search_results = loaded_ragxo_client.query("What is the capital of France
 llm_response = loaded_ragxo_client.generate_llm_response(
     "What is the capital of France?")
 
+print(llm_response.choices[0].message.content)
 ```
 
 

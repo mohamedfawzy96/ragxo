@@ -109,7 +109,8 @@ class Ragxo:
         self.system_prompt = prompt
         return self
     
-    def add_model(self, model: str,                              limit: int = 10,
+    def add_model(self, model: str,                              
+                        limit: int = 10,
                         temperature: float = 0.5,
                         max_tokens: int = 1000,
                         top_p: float = 1.0,
