@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ragxo"
-version = "0.1.4"
+version = "0.1.5"
 description = "A RAG (Retrieval-Augmented Generation) toolkit with Milvus integration"
 authors = ["Mohamed Sadek <mohamedfawzydes@gmail.com>"]
 readme = "README.md"
