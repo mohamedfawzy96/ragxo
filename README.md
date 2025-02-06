@@ -21,6 +21,50 @@ RagXO extends the capabilities of traditional RAG (Retrieval-Augmented Generatio
 pip install ragxo
 ```
 
+## Quickstart 🚀
+
+### Build a RAG pipeline
+
+```python
+from ragxo import Ragxo, Document
+
+def preprocess_text_lower(text: str) -> str:
+    return text.lower()
+
+def preprocess_text_remove_special_chars(text: str) -> str:
+    return re.sub(r'[^a-zA-Z0-9\s]', '', text)
+
+def get_embeddings(text: str) -> list[float]:
+    return openai.embeddings.create(text=text, model="text-embedding-ada-002").data[0].embedding
+
+ragxo_client = Ragxo(dimension=768)
+
+ragxo_client.add_preprocess(preprocess_text_lower)
+ragxo_client.add_preprocess(preprocess_text_remove_special_chars)
+ragxo_client.add_embedding_fn(get_embeddings)
+
+ragxo_client.add_system_prompt("You are a helpful assistant that can answer questions about the data provided.")
+ragxo_client.add_model("gpt-4o-mini")
+
+ragxo_client.index([Document(text="Hello, world!", metadata={"source": "example"}, id=1)])
+
+ragxo_client.export("my_rag_v1.0.0")
+
+```
+
+
+### Load a RAG pipeline
+
+```python
+loaded_ragxo_client = Ragxo.load("my_rag_v1.0.0")
+
+results = loaded_ragxo_client.query("What is the capital of France?")
+
+llm_response = loaded_ragxo_client.generate_llm_response("What is the capital of France?")
+
+```
+
+
 ## Usage Guide 📚
 
 ### Import
