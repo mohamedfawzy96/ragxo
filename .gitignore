@@ -37,3 +37,4 @@ htmlcov/
 */.env.production.local
 ragx_export/
 milvus.db
+ragx_artifacts/

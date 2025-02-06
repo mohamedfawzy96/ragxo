@@ -1,19 +1,10 @@
 # x.py
-from ragx import Ragx, Document
-from sentence_transformers import SentenceTransformer
-import nltk
-from nltk.tokenize import sent_tokenize
-import uuid
+from ragxo import Ragxo, Document
+import openai
 
-EMBEDDING_DIMENSION = 384
+EMBEDDING_DIMENSION = 1536
 
 # Create a callable class for the embedding function
-class SentenceTransformerEmbedding:
-    def __init__(self, model_name='all-MiniLM-L6-v2'):
-        self.model = SentenceTransformer(model_name)
-    
-    def __call__(self, text: str) -> list[float]:
-        return self.model.encode(text).tolist()
 
 def create_sample_documents():
     texts = [
@@ -45,16 +36,23 @@ def preprocess_text(text: str) -> str:
     sentences = [sentence.lower() for sentence in sentences]
     return " ".join(sentences)
 
+def embedding_function(text: str) -> list[float]:
+    client = openai.OpenAI()
+    response = client.embeddings.create(
+        input=text,
+        model="text-embedding-ada-002"
+    )
+    return response.data[0].embedding
+
 def main():
     # Initialize embedding model
-    embedding_model = SentenceTransformerEmbedding()
     
     # Initialize Ragx
-    ragx_retrieval = Ragx(dimension=EMBEDDING_DIMENSION)
+    ragx_retrieval = Ragxo(dimension=EMBEDDING_DIMENSION)
     
     # Add preprocessing and embedding functions
     ragx_retrieval.add_preprocess(preprocess_text)
-    ragx_retrieval.add_embedding_fn(embedding_model)
+    ragx_retrieval.add_embedding_fn(embedding_function)
     ragx_retrieval.add_system_prompt("You are a helpful assistant that can answer questions about the data provided.")
     ragx_retrieval.add_model("gpt-4o-mini")
     # Create and index sample documents
@@ -68,10 +66,10 @@ def main():
     print("Results:", results)
     
     # Export the index
-    ragx_retrieval.export("ragx_export")
     
+    ragx_retrieval.export("ragx_export_v3", s3_bucket="ragxo")
     # Load the index - CORRECTED THIS PART
-    loaded_ragx = Ragx.load("ragx_export")  # Use class method directly
+    loaded_ragx = Ragxo.load("ragx_export", s3_bucket="ragxo")  # Use class method directly
     
     # Verify it works after loading
     results_after_load = loaded_ragx.query(query)

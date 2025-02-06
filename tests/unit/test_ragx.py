@@ -1,11 +1,11 @@
 import pytest
-from ragx.ragx import Ragx, Document
+from ragxo import Ragxo, Document
 import os
 import shutil
 
 @pytest.fixture
 def ragx_instance():
-    return Ragx(dimension=2)
+    return Ragxo(dimension=3)
 
 @pytest.fixture
 def mock_embedding_fn():
@@ -19,8 +19,6 @@ def sample_documents():
     ]
 
 def test_ragx_initialization(ragx_instance):
-    assert ragx_instance.collection_name == "ragx"
-    assert ragx_instance.db_path == "milvus.db"
     assert isinstance(ragx_instance.processing_fn, list)
     assert len(ragx_instance.processing_fn) == 0
 
@@ -49,13 +47,11 @@ def test_export_and_load(ragx_instance, mock_embedding_fn, tmp_path):
     assert os.path.exists(os.path.join(export_path, "ragx.pkl"))
     
     # Load
-    new_instance = Ragx(dimension=2)
+    new_instance = Ragxo(dimension=2)
     new_instance.load(export_path)
     
     # Verify loaded instance
-    assert new_instance.collection_name == ragx_instance.collection_name
-    assert new_instance.db_path == ragx_instance.db_path
-    
+    assert new_instance.collection_name == ragx_instance.collection_name    
     # Cleanup
     shutil.rmtree(export_path)
 

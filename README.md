@@ -21,65 +21,15 @@ RagXO extends the capabilities of traditional RAG (Retrieval-Augmented Generatio
 pip install ragxo
 ```
 
-## Quick Start 🚀
+## Usage Guide 📚
+
+### Import
 
 ```python
 from ragxo import Ragxo, Document
-from openai import OpenAI
-client = OpenAI()
 
-def get_openai_embeddings(text: str) -> list[float]:
-    response = client.embeddings.create(
-        input=text,
-        model="text-embedding-ada-002"
-    )
-    return response.data[0].embedding
+ragxo_client = Ragxo(dimension=768)
 
-def preprocess_text(text: str) -> str:
-    return text.lower()
-
-# Initialize and configure RagXO
-ragxo = Ragxo(dimension=384)
-ragxo.add_preprocess(preprocess_text)
-ragxo.add_embedding_fn(get_openai_embeddings)
-
-# Add system prompt and model
-ragxo.add_system_prompt("You are a helpful assistant.")
-ragxo.add_model("gpt-4o-mini")
-
-# Create and index documents
-documents = [
-    Document(
-        text="Sample document for indexing",
-        metadata={"source": "example"},
-        id=1
-    )
-]
-ragxo.index(documents)
-
-# Export the pipeline
-ragxo.export("my_rag_v1")
-
-# Load and use elsewhere
-loaded_ragxo = Ragxo.load("my_rag_v1")
-
-# Query and generate response
-similar_docs = loaded_ragxo.query("sample query")
-llm_response = loaded_ragxo.generate_llm_response("What can you tell me about the sample?")
-```
-
-## Usage Guide 📚
-
-### Creating Documents
-
-```python
-from ragxo import Document
-
-doc = Document(
-    text="Your document content here",
-    metadata={"source": "wiki", "category": "science"},
-    id=1
-)
 ```
 
 ### Adding Preprocessing Steps
@@ -93,8 +43,8 @@ def remove_special_chars(text: str) -> str:
 def lowercase(text: str) -> str:
     return text.lower()
 
-ragxo.add_preprocess(remove_special_chars)
-ragxo.add_preprocess(lowercase)
+ragxo_client.add_preprocess(remove_special_chars)
+ragxo_client.add_preprocess(lowercase)
 ```
 
 ### Custom Embedding Functions
@@ -123,27 +73,43 @@ def get_openai_embeddings(text: str) -> list[float]:
 ragxo.add_embedding_fn(get_openai_embeddings)
 ```
 
+
+### Creating Documents
+
+```python
+from ragxo import Document
+
+doc = Document(
+    text="Your document content here",
+    metadata={"source": "wiki", "category": "science"},
+    id=1
+)
+
+ragxo_client.index([doc])
+
+```
+
 ### LLM Configuration
 
 ```python
 # Set system prompt
-ragxo.add_system_prompt("""
+ragxo_client.add_system_prompt("""
 You are a helpful assistant. Use the provided context to answer questions accurately.
 If you're unsure about something, please say so.
 """)
 
 # Set LLM model
-ragxo.add_model("gpt-4")
+ragxo_client.add_model("gpt-4")
 ```
 
 ### Export and Load
 
 ```python
 # Export your RAG pipeline
-ragxo.export("rag_pipeline_v1")
+ragxo_client.export("rag_pipeline_v1")
 
 # Load it elsewhere
-loaded_ragxo = Ragxo.load("rag_pipeline_v1")
+loaded_ragxo_client = Ragxo.load("rag_pipeline_v1")
 ```
 
 ## Best Practices 💡
@@ -153,27 +119,15 @@ loaded_ragxo = Ragxo.load("rag_pipeline_v1")
 ragxo.export("my_rag_v1.0.0")
 ```
 
-2. **Validate After Loading**: Always test your loaded pipeline:
-```python
-loaded_ragxo = Ragxo.load("my_rag")
-try:
-    # Test similarity search
-    similar_docs = loaded_ragxo.query("test query")
-    # Test LLM generation
-    llm_response = loaded_ragxo.generate_llm_response("test question")
-    print("Pipeline loaded successfully!")
-except Exception as e:
-    print(f"Error loading pipeline: {e}")
+2. **S3**: Use S3 to store your exports
+
+```shell
+export AWS_ACCESS_KEY_ID=your_access_key
+export AWS_SECRET_ACCESS_KEY=your_secret_key
 ```
 
-3. **Document Your Pipeline Configuration**: Keep track of your setup:
 ```python
-pipeline_config = {
-    "preprocessing_steps": ["remove_special_chars", "lowercase"],
-    "embedding_model": "all-MiniLM-L6-v2",
-    "llm_model": "gpt-4",
-    "dimension": 384
-}
+ragxo_client.export("my_rag_v1.0.0", s3_bucket="my_bucket")
 ```
 
 ## License 📝
