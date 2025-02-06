@@ -16,7 +16,7 @@ class Document(BaseModel):
     metadata: dict
     id: int
 
-class Ragx:
+class Ragxo:
     def __init__(self, dimension: int) -> None:
         self.dimension = dimension
         self.collection_name = "ragx"
@@ -126,7 +126,11 @@ class Ragx:
             logger.error(f"Error in load: {e}")
             raise
     
-    def generate_llm_response(self, query: str) -> ChatCompletion:
+    def generate_llm_response(self, query: str, data: list[dict] = None) -> ChatCompletion:
+        
+        if data is None:
+            data = self.query(query)[0]
+        
         if not self.system_prompt:
             raise ValueError("System prompt not set. Please call add_system_prompt first.")
         
@@ -134,7 +138,7 @@ class Ragx:
             model=self.model,
             messages=[
                 {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": query}
+                {"role": "user", "content": "query: {} data: {}".format(query, data)}
             ]
         )
         
