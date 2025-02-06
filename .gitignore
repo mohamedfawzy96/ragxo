@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+# Poetry
+poetry.lock
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+*/__pycache__
+*/__pycache__/*
+*/.DS_Store
+*/.env
+*/.env.local
+*/.env.development.local
+*/.env.test.local
+*/.env.production.local
+ragx_export/
+milvus.db
