@@ -27,6 +27,10 @@ pip install ragxo
 
 ### Build a RAG pipeline
 
+```bash
+export OPENAI_API_KEY=<openai_key> 
+```
+
 ```python
 from ragxo import Ragxo, Document
 
