@@ -6,6 +6,8 @@ Export, version and reuse your E2E RAG pipeline everywhere 🚀
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/release/python-380/)
 
+RagXO extends the capabilities of traditional RAG (Retrieval-Augmented Generation) systems by providing a unified way to package, version, and deploy your entire RAG pipeline with LLM integration. Export your complete system—including embedding functions, preprocessing steps, vector store, and LLM configurations—into a single, portable artifact.
+
 ## Table of Contents
 - [Features](#features-)
 - [Installation](#installation-️)
@@ -24,7 +26,6 @@ Export, version and reuse your E2E RAG pipeline everywhere 🚀
 - [License](#license-)
 - [Contributing](#contributing-)
 
-RagXO extends the capabilities of traditional RAG (Retrieval-Augmented Generation) systems by providing a unified way to package, version, and deploy your entire RAG pipeline with LLM integration. Export your complete system—including embedding functions, preprocessing steps, vector store, and LLM configurations—into a single, portable artifact.
 
 ## Features ✨
 
