@@ -6,6 +6,24 @@ Export, version and reuse your E2E RAG pipeline everywhere 🚀
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/release/python-380/)
 
+## Table of Contents
+- [Features](#features-)
+- [Installation](#installation-️)
+- [Quickstart](#quickstart-)
+  - [Build a RAG pipeline](#build-a-rag-pipeline)
+  - [Load a RAG pipeline](#load-a-rag-pipeline)
+- [Usage Guide](#usage-guide-)
+  - [Import](#import)
+  - [Adding Preprocessing Steps](#adding-preprocessing-steps)
+  - [Custom Embedding Functions](#custom-embedding-functions)
+  - [Creating Documents](#creating-documents)
+  - [LLM Configuration](#llm-configuration)
+  - [Export and Load](#export-and-load)
+  - [Evaluation](#evaluation)
+- [Best Practices](#best-practices-)
+- [License](#license-)
+- [Contributing](#contributing-)
+
 RagXO extends the capabilities of traditional RAG (Retrieval-Augmented Generation) systems by providing a unified way to package, version, and deploy your entire RAG pipeline with LLM integration. Export your complete system—including embedding functions, preprocessing steps, vector store, and LLM configurations—into a single, portable artifact.
 
 ## Features ✨
@@ -180,6 +198,46 @@ ragxo_client.export("rag_pipeline_v1")
 # Load it elsewhere
 loaded_ragxo_client = Ragxo.load("rag_pipeline_v1")
 ```
+
+### Evaluation
+
+```python
+from ragxo import EvaluationExample
+
+# Create test examples
+test_data = [
+    EvaluationExample(
+        query="What is the capital of France?",
+        expected="The capital of France is Paris."
+    ),
+    EvaluationExample(
+        query="What is the capital of Germany?",
+        expected="The capital of Germany is Berlin."
+    ),
+]
+
+# Evaluate the RAG system
+accuracy = ragxo_client.evaluate(
+    test_data=test_data,
+    batch_size=10,  # Process 10 examples at a time
+    judge_model="gpt-4"  # Optional: specify a different model for evaluation
+)
+
+print(f"Evaluation accuracy: {accuracy * 100:.2f}%")
+```
+
+The evaluation process:
+1. Processes test examples in batches
+2. Generates RAG responses for each query
+3. Uses an LLM to compare generated answers with expected answers
+4. Returns accuracy score (0.0 to 1.0)
+
+Best practices for evaluation:
+- Use diverse test examples
+- Include edge cases
+- Keep expected answers consistent in format
+- Use a more capable model for evaluation (e.g., GPT-4)
+- Adjust batch size based on your rate limits and needs
 
 ## Best Practices 💡
 
