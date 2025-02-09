@@ -220,7 +220,7 @@ test_data = [
 accuracy = ragxo_client.evaluate(
     test_data=test_data,
     batch_size=10,  # Process 10 examples at a time
-    judge_model="gpt-4"  # Optional: specify a different model for evaluation
+    judge_model="gpt-4o-mini"  # Optional: specify a different model for evaluation
 )
 
 print(f"Evaluation accuracy: {accuracy * 100:.2f}%")
