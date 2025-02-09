@@ -69,7 +69,7 @@ def main():
     
     ragx_retrieval.export("ragx_export_v3", s3_bucket="ragxo")
     # Load the index - CORRECTED THIS PART
-    loaded_ragx = Ragxo.load("ragx_export", s3_bucket="ragxo")  # Use class method directly
+    loaded_ragx = Ragxo.load("ragx_export_v3", s3_bucket="ragxo")  # Use class method directly
     
     # Verify it works after loading
     results_after_load = loaded_ragx.query(query)

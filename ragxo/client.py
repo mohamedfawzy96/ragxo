@@ -60,6 +60,13 @@ class Ragxo:
         self.embedding_fn = None
         self.system_prompt = None
         self.model = "gpt-4o-mini"
+        self.limit = 10
+        self.temperature = 0.5
+        self.max_tokens = 2000
+        self.top_p = 1.0
+        self.frequency_penalty = 0.0
+        self.presence_penalty = 0.0
+        
     
     def add_preprocess(self, fn: Callable) -> Self:
         """
