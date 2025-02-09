@@ -11,6 +11,7 @@ import tempfile
 from botocore.exceptions import ClientError
 import openai
 from openai import ChatCompletion
+from ragxo.utils import with_loading
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +141,7 @@ class Ragxo:
         self.presence_penalty = presence_penalty
         return self
     
+    @with_loading("Indexing documents")
     def index(self, data: list[Document]) -> Self:
         """
         Index documents into the vector database.
@@ -210,6 +212,7 @@ class Ragxo:
             output_fields=output_fields
         )
 
+    @with_loading("Exporting Ragxo instance")
     def export(self, destination: str, s3_bucket: str = None) -> Self:
         """
         Export the Ragx instance to either local filesystem or S3.
