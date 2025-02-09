@@ -328,7 +328,7 @@ class Ragxo:
             raise
 
     @classmethod
-    def _load_from_s3(cls, prefix: str, bucket: str) -> 'Ragxo':
+    def _load_from_s3(cls, prefix: str, bucket: str) -> Self:
         """
         Internal classmethod to handle S3 loading.
         """
