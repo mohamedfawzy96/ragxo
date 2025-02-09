@@ -80,5 +80,5 @@ ragxo.index(documents)
 # -----------------------------
 # Here we evaluate in batches; you can adjust the batch_size as desired.
 batch_size = 20
-accuracy = ragxo.evaluate(evaluation_examples, batch_size=1000)
+accuracy = ragxo.evaluate(evaluation_examples, batch_size=batch_size)
 print(f"Final Accuracy: {accuracy * 100:.2f}%")

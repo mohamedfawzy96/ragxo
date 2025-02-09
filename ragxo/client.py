@@ -363,13 +363,17 @@ class Ragxo:
     
     def generate_llm_response(self, 
                               query: str,
+                              history: list[dict] = [],
+                              messages: list[dict] = None,
                               data: list[dict] = None) -> ChatCompletion:
         """
         Generate LLM response based on query and retrieved data.
         
         Args:
-            query (str): User query
+            query (str): User query, this is used if messages is None
             data (list[dict], optional): Retrieved documents. If None, performs a new query
+            history (list[dict], optional): History of messages
+            messages (list[dict], optional): Messages to pass to the LLM: [{"role": "system", "content": system_prompt}, {"role": "user", "content": "Some user message"}, {"role": "assistant", "content": "Some assistant message"}]
             
         Returns:
             ChatCompletion: LLM response
@@ -386,9 +390,10 @@ class Ragxo:
         response = openai.chat.completions.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": self.system_prompt},
+                {"role": "system", "content": self.system_prompt}
+            ] + history + [
                 {"role": "user", "content": f"query: {query} data: {data}"}
-            ],
+            ] if messages is None else messages,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
             top_p=self.top_p,
