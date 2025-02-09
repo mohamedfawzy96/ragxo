@@ -1,7 +1,7 @@
 import time
-from typing import Self, Callable
+from typing import Literal, Self, Callable
 from pymilvus import MilvusClient
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import boto3
 import dill
 import os
@@ -19,6 +19,14 @@ class Document(BaseModel):
     text: str
     metadata: dict
     id: int
+
+class EvaluationExample(BaseModel):
+    query: str
+    expected: str
+
+class EvaluationResults(BaseModel):
+    results: list[str] = Field(description="A list of strings, each either 'correct' or 'incorrect'")
+
 
 class Ragxo:
     """
@@ -313,7 +321,7 @@ class Ragxo:
             raise
 
     @classmethod
-    def _load_from_s3(cls, prefix: str, bucket: str) -> 'Ragx':
+    def _load_from_s3(cls, prefix: str, bucket: str) -> 'Ragxo':
         """
         Internal classmethod to handle S3 loading.
         """
@@ -379,7 +387,7 @@ class Ragxo:
             model=self.model,
             messages=[
                 {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": "query: {} data: {}".format(query, data)}
+                {"role": "user", "content": f"query: {query} data: {data}"}
             ],
             temperature=self.temperature,
             max_tokens=self.max_tokens,
@@ -389,3 +397,84 @@ class Ragxo:
         )
         
         return response
+
+    
+    
+    @with_loading("Evaluating test dataset")
+    def evaluate(self, test_data: list[EvaluationExample], batch_size: int = 10, judge_model: str = "gpt-4o-mini") -> float:
+        """
+        Evaluate the performance of the RAG system on a test dataset using a single prompt per batch.
+        
+        For each batch:
+        1. Generates an answer for each query.
+        2. Concatenates evaluation details (query, expected, generated answer) into one prompt.
+        3. Instructs the judge to output a JSON object strictly adhering to our schema:
+            {"results": ["correct", "incorrect", ...]}.
+        4. Parses the structured output and computes overall accuracy.
+        
+        Args:
+            test_data (list[EvaluationExample]): List of evaluation examples.
+            batch_size (int): Number of examples to process per batch.
+        
+        Returns:
+            float: Accuracy as a fraction of correct evaluations.
+        """
+        total = len(test_data)
+        correct_count = 0
+
+        for i in range(0, total, batch_size):
+            batch = test_data[i : i + batch_size]
+            batch_prompt = "Evaluate the following examples and output your answer as a JSON object with a single key \"results\" that maps to an array of strings. Each element in the array should be either \"correct\" or \"incorrect\", corresponding to each example in order.\n\n"
+            
+            # For each example in the batch, generate the answer and include details.
+            for idx, example in enumerate(batch):
+                query = example.query
+                expected = example.expected
+
+                # Generate the answer using the RAG system.
+                llm_response = self.generate_llm_response(query)
+                generated_answer = llm_response.choices[0].message.content.strip()
+                
+                batch_prompt += f"Example {idx+1}:\n"
+                batch_prompt += f"Query: {query}\n"
+                batch_prompt += f"Expected Answer: {expected}\n"
+                batch_prompt += f"Generated Answer: {generated_answer}\n\n"
+            
+            # Append clear instructions for the structured output.
+            batch_prompt += (
+                "Return your output as a JSON object exactly in this format: "
+                "{\"results\": [\"correct\", \"incorrect\", ...]} with no additional text or markdown formatting."
+            )
+
+            messages = [
+                {"role": "system", "content": "You are an expert evaluator. Evaluate whether each generated answer meets the expected answer."},
+                {"role": "user", "content": batch_prompt}
+            ]
+            
+            # Call the OpenAI API with a structured response enforced via a JSON Schema.
+            response = openai.beta.chat.completions.parse(
+                model=judge_model,
+                messages=messages,
+                temperature=0,  # Deterministic output.
+                response_format=EvaluationResults
+            )
+
+            output_text = response.choices[0].message.content.strip()
+            
+            try:
+                # Parse the JSON output using the Pydantic model.
+                eval_results = EvaluationResults.model_validate_json(output_text)
+            except Exception as e:
+                print(f"Error parsing JSON: {e}\nReceived output: {output_text}")
+                eval_results = None
+            
+            if eval_results:
+                for result in eval_results.results:
+                    if result.lower() == "correct":
+                        correct_count += 1
+            else:
+                print("Skipping batch due to parsing error.")
+
+        accuracy = correct_count / total if total > 0 else 0.0
+        print(f"Accuracy: {accuracy * 100:.2f}% ({correct_count}/{total})")
+        return accuracy
