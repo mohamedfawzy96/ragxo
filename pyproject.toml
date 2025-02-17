@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ragxo"
-version = "0.1.12"
+version = "0.1.13"
 description = "A RAG (Retrieval-Augmented Generation) toolkit with Milvus integration"
 authors = ["Mohamed Sadek <mohamedfawzydes@gmail.com>"]
 readme = "README.md"
@@ -20,7 +20,6 @@ packages = [{include = "ragxo"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-milvus = "^2.3.9"
 pymilvus = "^2.5.4"
 pydantic = "^2.10.6"
 dill = "<0.3.9"

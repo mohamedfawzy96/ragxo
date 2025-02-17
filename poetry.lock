@@ -983,19 +983,6 @@ files = [
 ]
 
 [[package]]
-name = "milvus"
-version = "2.3.9"
-description = "Embeded Milvus"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "milvus-2.3.9-py3-none-macosx_12_0_arm64.whl", hash = "sha256:2e770b1cb76d8f4ba0e3ce1c2e49bdb9cd38222f8662762db9d794e577dac826"},
-]
-
-[package.extras]
-client = ["pymilvus (>=2.3.0b1,<2.4.0)"]
-
-[[package]]
 name = "milvus-lite"
 version = "2.4.11"
 description = "A lightweight version of Milvus wrapped with Python."
@@ -2376,4 +2363,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "e8f11465870312392ba15b5766d347ae0cdbc91dac81a1b0583a634f0168f002"
+content-hash = "2c8490a74f1b475e778db9b65f3f1dfefe6b68e4384f8c99849eb083ab34d6a2"
